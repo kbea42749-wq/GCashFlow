@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GCash Business Ledger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css?v=8" />
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" focusable="false">
+              <path d="M15 22a7 7 0 0 1 7-7h25a4 4 0 0 1 4 4v5H20a7 7 0 0 0-5 2z" fill="#bde8ff" />
+              <rect x="11" y="21" width="42" height="33" rx="10" fill="#fff" stroke="#0877d1" stroke-width="3" />
+              <path d="M12 29h32a8 8 0 0 1 8 8v3H40a7 7 0 0 1 0-14h8" fill="#dff4ff" stroke="#0877d1" stroke-linejoin="round" stroke-width="3" />
+              <circle cx="25" cy="39" r="2" fill="#0877d1" />
+              <circle cx="33" cy="39" r="2" fill="#0877d1" />
+              <path d="M25 45q4 4 8 0" fill="none" stroke="#0877d1" stroke-linecap="round" stroke-width="2" />
+              <circle cx="42" cy="34" r="1.7" fill="#0877d1" />
+              <path d="M51 12v5m-2.5-2.5h5" stroke="#69ccef" stroke-linecap="round" stroke-width="2" />
+            </svg>
+          </div>
+          <div class="brand-copy">
+            <p class="eyebrow">BUSINESS WALLET</p>
+            <h1><span>GCash</span> Business</h1>
+          </div>
+        </div>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="home.html">Home</a>
+          <a href="index.html" aria-current="page">Receipt Reader</a>
+        </nav>
+      </header>
+
+      <main class="dashboard">
+        <section class="panel form-panel" id="uploadReceipt">
+          <div class="panel-header">
+            <h2>Upload Receipt</h2>
+            <span id="modeBadge" class="mode-badge cash-in">Cash In</span>
+          </div>
+
+          <form id="transactionForm">
+            <div class="upload-box">
+              <label class="receipt-picker" for="receiptInput">
+                <span class="receipt-picker-icon" aria-hidden="true">+</span>
+                <span class="receipt-picker-copy">
+                  <strong>Choose receipt photo</strong>
+                  <small>Take a photo or select from Photos</small>
+                </span>
+                <input id="receiptInput" type="file" accept="image/*" aria-describedby="uploadHint" />
+              </label>
+              <p id="uploadHint" class="upload-help">JPG, PNG or screenshot · Up to 8 MB</p>
+            </div>
+
+            <div id="receiptPreviewWrap" class="receipt-preview hidden">
+              <span class="receipt-image-frame">
+                <img id="receiptPreview" alt="Receipt preview" />
+                <span class="receipt-scan-line" aria-hidden="true"></span>
+              </span>
+              <button type="button" id="clearReceiptBtn" class="link-btn">Remove</button>
+            </div>
+
+            <div class="result-grid">
+              <div class="result-card">
+                <span class="label">Detected Type</span>
+                <strong id="detectedType">Waiting for receipt</strong>
+              </div>
+              <div class="result-card">
+                <span class="label">Detected Amount</span>
+                <strong id="detectedAmount">₱0.00</strong>
+              </div>
+              <div class="result-card">
+                <span class="label">Customer / Name</span>
+                <strong id="detectedName">Waiting for receipt</strong>
+              </div>
+              <div class="result-card success">
+                <span class="label">Cash on Hand</span>
+                <strong id="cashOnHand">₱0.00</strong>
+              </div>
+              <div class="result-card neutral">
+                <span class="label">GCash Available</span>
+                <strong id="gcashAvailable">₱0.00</strong>
+              </div>
+              <div class="result-card warning">
+                <span class="label">Service Fee</span>
+                <strong id="detectedFee">₱0.00</strong>
+              </div>
+            </div>
+
+            <div id="ocrStatus" class="ocr-status">Ready to read receipt.</div>
+
+            <div class="action-row">
+              <button type="submit" class="primary-btn">Save Receipt</button>
+              <button type="button" id="resetBtn" class="secondary-btn">Reset</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel stats-panel">
+          <div class="balance-settings" id="balanceSettings">
+            <button type="button" id="proceedBalanceEdit" class="secondary-btn" aria-expanded="false" aria-controls="balanceEditor">Settings</button>
+            <form id="balanceEditor" class="balance-editor" hidden>
+              <div class="balance-editor-heading">
+                <span class="balance-editor-icon" aria-hidden="true">₱</span>
+                <h3>Current Balances</h3>
+              </div>
+              <div class="balance-editor-fields">
+                <label class="balance-field">
+                  <span>Cash on Hand</span>
+                  <span class="currency-input">
+                    <span aria-hidden="true">₱</span>
+                    <input id="openingCashInput" type="number" min="0" step="0.01" required />
+                  </span>
+                </label>
+                <label class="balance-field">
+                  <span>GCash Available</span>
+                  <span class="currency-input">
+                    <span aria-hidden="true">₱</span>
+                    <input id="openingGcashInput" type="number" min="0" step="0.01" required />
+                  </span>
+                </label>
+              </div>
+              <section class="fee-schedule" aria-labelledby="feeScheduleTitle">
+                <h3 id="feeScheduleTitle">Service Fee Schedule</h3>
+                <dl class="fee-schedule-list">
+                  <div><dt>₱1 - ₱500</dt><dd>₱5</dd></div>
+                  <div><dt>₱501 - ₱1,000</dt><dd>₱10</dd></div>
+                  <div><dt>₱1,001 - ₱2,000</dt><dd>₱20</dd></div>
+                  <div><dt>₱2,001 - ₱3,000</dt><dd>₱30</dd></div>
+                  <div><dt>₱3,001 - ₱4,000</dt><dd>₱40</dd></div>
+                  <div><dt>₱4,001 - ₱5,000</dt><dd>₱50</dd></div>
+                  <div><dt>₱5,001 - ₱6,000</dt><dd>₱60</dd></div>
+                  <div><dt>₱6,001 - ₱7,000</dt><dd>₱70</dd></div>
+                  <div><dt>₱7,001 - ₱8,000</dt><dd>₱80</dd></div>
+                  <div><dt>₱8,001 - ₱9,000</dt><dd>₱90</dd></div>
+                  <div><dt>₱9,001 - ₱10,000</dt><dd>₱100</dd></div>
+                </dl>
+                <p class="fee-schedule-note">Above ₱10,000: add ₱10 for each additional ₱1,000 range.</p>
+              </section>
+              <div class="balance-editor-actions">
+                <button type="submit" class="primary-btn">Save Changes</button>
+                <button type="button" id="cancelBalanceEdit" class="secondary-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+          <div class="stat-card success">
+            <p>Total Cash In</p>
+            <h3 id="totalCashIn">₱0.00</h3>
+          </div>
+          <div class="stat-card danger">
+            <p>Total Cash Out</p>
+            <h3 id="totalCashOut">₱0.00</h3>
+          </div>
+          <div class="stat-card success">
+            <p>Cash on Hand</p>
+            <h3 id="summaryCashOnHand">₱5,000.00</h3>
+          </div>
+          <div class="stat-card warning">
+            <p>GCash Available</p>
+            <h3 id="summaryGcashAvailable">₱5,000.00</h3>
+          </div>
+          <div class="stat-card neutral">
+            <p>Total Earnings</p>
+            <h3 id="totalEarnings">₱0.00</h3>
+          </div>
+        </section>
+
+        <section class="panel ledger-panel">
+          <div class="panel-header">
+            <h2>Recent Receipt Activity</h2>
+            <span id="transactionCount" class="mini-pill">0 entries</span>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Fee</th>
+                  <th>Proof</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js?v=3"></script>
+  </body>
+</html>
